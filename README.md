@@ -105,7 +105,7 @@ The default firmware subscribes to the topic "/light/1" and expects the followin
 ```
 {"On":0}
 ```
-- Set brightness value:
+- Set brightness level:
 ```
 {"Brightness":<A VALUE BETWEEN 0 AND 100>}
 ```
