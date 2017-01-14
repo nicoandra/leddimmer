@@ -8,6 +8,7 @@ Of course by using MQTT you can control it with whatever you like and not necess
 <img src="https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/toplayer.jpg?raw=true" width="300">
 <img src="https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/bottomlayer.jpg?raw=true" width="300">
 
+
 ## Layout
 
 The layout is made with KiCad but I have also included an screenshot of the schematic, in case you want to make your own PCB with another software.
@@ -15,9 +16,67 @@ The layout is made with KiCad but I have also included an screenshot of the sche
 <img src="https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/top.png?raw=true" width="300">
 <img src="https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/bot.png?raw=true" width="300">
 
+## Parts
+<table>
+<tr>
+  <th>
+    Nr.
+  </th>
+  <th>
+    Part
+  </th>
+  <th>
+    Package
+  </th>
+  <th>
+    Qty.
+   </th>
+</tr>
+<tr>
+  <td>1</td>
+  <td>Capacitor 100nF</td>
+  <td>0402</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>Capacitor 1uF</td>
+  <td>Package 0402</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>Resistor 10k</td>
+  <td>Package 0805</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Voltage regulator TLV1117</td>
+  <td>SOT-223</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>AK300-2 Terminal for LED strip</td>
+  <td>-</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>ESP8266-12E</td>
+  <td></td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td>Standard barrel jack for power supply</td>
+  <td></td>
+  <td>1</td>
+</tr>
+</table>
 
-
-#### Schematic v0.1
+#### Schematic v0.2
 
 ![Schematic](https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/schematic.png?raw=true)
 
