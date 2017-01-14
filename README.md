@@ -11,12 +11,12 @@ Of course by using MQTT you can control it with whatever you like and not necess
 
 ## Layout
 
-The layout is made with KiCad but I have also included an screenshot of the schematic, in case you want to make your own PCB with another software.
+The layout is made with KiCad but I have also included an screenshot of the schematic, in case you want to make your own PCB with another software. You could simply produce this PCB for example by uploading the `ESPDimmer.kicad_pcb` file directly in [AISLER](https://go.aisler.net) .
 
 <img src="https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/top.png?raw=true" width="300">
 <img src="https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/bot.png?raw=true" width="300">
 
-## Parts
+### Parts
 <table>
 <tr>
   <th>
@@ -76,7 +76,7 @@ The layout is made with KiCad but I have also included an screenshot of the sche
 </tr>
 </table>
 
-#### Schematic v0.2
+### Schematic v0.2
 
 ![Schematic](https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/schematic.png?raw=true)
 
