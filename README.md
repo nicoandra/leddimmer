@@ -1,4 +1,10 @@
 # ESP8266 LED Dimmer (MQTT controlled)
+
+1. [Layout](#layout)
+  1. [Parts](#parts)
+  2. [Schematic](#schematic)
+2. [Firmware](#firmware)
+
 This is a very simple wifi enabled (ESP8266 12e) LED dimmer for single colored LED strips. The PCB also features a DS18B20 digital thermometer because why not? :-D Thus, in every room with an led strip one can also have the room temperature monitored.
 
 Its purpose was originally to be controlled by Node-RED (http://nodered.org) and node-red-contrib-homekit (https://flows.nodered.org/node/node-red-contrib-homekit) using MQTT events. Thus, one could control this with Apple Homekit.
@@ -76,7 +82,7 @@ The layout is made with KiCad but I have also included an screenshot of the sche
 </tr>
 </table>
 
-### Schematic v0.2
+### Schematic
 
 ![Schematic](https://github.com/stelioskat/ESP8266-Dimmer/blob/master/pics/schematic.png?raw=true)
 
