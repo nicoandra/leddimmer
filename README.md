@@ -4,6 +4,7 @@
   1. [Parts](#parts)
   2. [Schematic](#schematic)
 2. [Firmware](#firmware)
+  1. [MQTT](#mqtt)
 
 This is a very simple wifi enabled (ESP8266 12e) LED dimmer for single colored LED strips. The PCB also features a DS18B20 digital thermometer because why not? :-D Thus, in every room with an led strip one can also have the room temperature monitored.
 
@@ -88,7 +89,23 @@ The layout is made with KiCad but I have also included an screenshot of the sche
 
 ## Firmware
 
-The firmware can be compiled in Arduino IDE using the available ESP8266 package. In order to flash the firmware you will need a USB-to-Serial adapter such as the FTDI232 that I am using (https://github.com/jandelgado/arduino/wiki/FTDI232-USB-to-Serial-converter).
+The firmware can be compiled in Arduino IDE using the available ESP8266 package. In order to flash the firmware you will need a USB-to-Serial adapter such as the FTDI232 that I am using (https://github.com/jandelgado/arduino/wiki/FTDI232-USB-to-Serial-converter). Keep in mind that you will have to update the Wifi credentials and also the MQTT broker hostname and port to fit your own.
 
+Of course, you could write your own firmware or you use another one since this is basically a breakout board.
 
+### MQTT
 
+The default firmware subscribes to the topic "/light/1" and expects the following JSON messages to control the LED strip and its brightness.
+
+- Turn on command:
+```
+{"On":1}
+```
+- Turn off command:
+```
+{"On":0}
+```
+- Set brightness value:
+```
+{"Brightness":<A VALUE BETWEEN 0 AND 100>}
+```
