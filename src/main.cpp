@@ -4,9 +4,8 @@
 #include <led.h>
 
 
-
 slacker::Led channels[3] = {
-  slacker::Led(D0),
+  slacker::Led(D4),
   slacker::Led(D1),
   slacker::Led(D3)
 };
@@ -14,6 +13,7 @@ slacker::Led channels[3] = {
 unsigned int localPort = 8888;
 WiFiUDP UDP;
 boolean udpConnected = false;
+byte mac[6];                     // the MAC address of your Wifi shield
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; //buffer to hold incoming packet,
 // char ReplyBuffer[] = "Acknowledged";
 
@@ -45,10 +45,20 @@ void listenUdp(){
   // if there’s data available, read a packet
   int packetSize = UDP.parsePacket();
 
-  if(!packetSize || packetSize != 2){
-    // Serial.println("No length");
+  if(packetSize == 0){
+    Serial.print(".");
+    delay(20);
     return ;
   }
+
+  if(packetSize != 2){
+    Serial.print("x");
+    delay(20);
+    return ;
+  }
+
+  Serial.print(packetSize);
+  UDP.read(packetBuffer,packetSize);
 
   IPAddress remote = UDP.remoteIP();
   for (int i =0; i < 4; i++){
@@ -57,20 +67,24 @@ void listenUdp(){
       Serial.print(".");
     }
   }
-  Serial.print(": ");
-  // read the packet into packetBufffer
-  UDP.read(packetBuffer,UDP_TX_PACKET_MAX_SIZE);
-  int ledNumber = packetBuffer[0] - 0xF0;
+
+  int ledNumber = packetBuffer[0];
+  if(ledNumber < 0xF0){
+    Serial.println("Reject packet.");
+    return ;
+  }
+
+  ledNumber = ledNumber - 0xF0;
   int ledPower = packetBuffer[1];
 
   setChannel(ledNumber, ledPower);
-  /*Serial.print(ledNumber);
-  Serial.println(ledPower);*/
+  Serial.print(ledNumber);
+  Serial.println(ledPower);
   return ;
 } // End of void listenUdp();
 
 void setup(){
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Booted 1");
 
   // Network settings
@@ -79,9 +93,22 @@ void setup(){
   wifiManager.autoConnect();
   Serial.println("Booted and connected");
 
+  WiFi.macAddress(mac);
+  Serial.print("MAC: ");
+  Serial.print(mac[5],HEX);
+  Serial.print(":");
+  Serial.print(mac[4],HEX);
+  Serial.print(":");
+  Serial.print(mac[3],HEX);
+  Serial.print(":");
+  Serial.print(mac[2],HEX);
+  Serial.print(":");
+  Serial.print(mac[1],HEX);
+  Serial.print(":");
+  Serial.println(mac[0],HEX);
+
   if(connectUDP()) {
     Serial.println("Listening UDP");
-    listenUdp();
   }
 }
 
