@@ -129,8 +129,30 @@ void saveConfigCallback () {
 
 
 void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
-
   JsonObject& jsonPayload = jsonBufferSub.parseObject(payload);
+
+  jsonPayload.printTo(Serial);
+
+  for(int i = 1; i < 8; i++){
+    char lightCharArray[15];
+    sprintf(lightCharArray, "light%01d", i);
+
+    JsonVariant lightName = jsonPayload[lightCharArray];
+    if(!lightName.success()){
+      Serial.print("No data for light ");
+      Serial.println(i);
+      continue;
+    }
+
+    Serial.print(i);
+    Serial.print(" : ");
+    String value = lightName.as<char*>();
+    Serial.println(value);
+  }
+
+
+  return ;
+
   String value = jsonPayload[String("hola")];
   Serial.println(value);
   jsonPayload.printTo(Serial);
@@ -261,8 +283,6 @@ void reconnect() {
       // ... and resubscribe
       client.subscribe("inTopic");
       client.subscribe(topicBuffer);
-
-
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
