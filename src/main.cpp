@@ -332,5 +332,4 @@ void loop() {
     client.publish("outTopic", msg);*/
     announce();
   }
-
 }

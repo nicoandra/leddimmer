@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ESP8266 LED Dimmer (MQTT controlled)
 
 1. [Layout](#layout)
@@ -109,3 +110,7 @@ The default firmware subscribes to the topic "/light/1" and expects the followin
 ```
 {"Brightness":<A VALUE BETWEEN 0 AND 100>}
 ```
+=======
+# leddimmer
+ESP-8266 UDP Led Dimmer
+>>>>>>> 850591a70b2879f6ece821580655199c0bce65be
