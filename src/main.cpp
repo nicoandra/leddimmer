@@ -146,8 +146,26 @@ void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
 
     Serial.print(i);
     Serial.print(" : ");
-    String value = lightName.as<char*>();
+    String stringValue = lightName.as<char*>();
+    int value = stringValue.toInt();
+
+    int pinNumber = 1;
+    switch(i){
+      case 1: pinNumber = 5; break;
+      case 2: pinNumber = 4; break;
+      case 3: pinNumber = 0; break;
+      case 4: pinNumber = 2; break;
+      case 5: pinNumber = 14; break;
+      case 6: pinNumber = 12; break;
+      case 7: pinNumber = 13; break;
+      case 8: pinNumber = 15; break;
+    }
+    Serial.print("PinNumber: ");
+    Serial.print(pinNumber);
+    Serial.print(" value: ");
     Serial.println(value);
+    // Serial.println(String("Setting pin ") + String(pinNumber) + String(" to analog value ") + String(value));
+    analogWrite(pinNumber, value);
   }
 
 
@@ -225,10 +243,17 @@ void setup() {
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   wifiManager.setAPCallback(configModeCallback);
 
-  pinMode(D2, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  digitalWrite(D2, LOW);
   pinMode(D0, INPUT);
   digitalWrite(D0, LOW);
+
+  pinMode(D1, OUTPUT);  digitalWrite(D1, LOW);
+  pinMode(D2, OUTPUT);  digitalWrite(D2, LOW);
+  pinMode(D3, OUTPUT);  digitalWrite(D3, LOW);
+  pinMode(D4, OUTPUT);  digitalWrite(D4, LOW);
+  pinMode(D5, OUTPUT);  digitalWrite(D5, LOW);
+  pinMode(D6, OUTPUT);  digitalWrite(D6, LOW);
+  pinMode(D7, OUTPUT);  digitalWrite(D7, LOW);
+  pinMode(D8, OUTPUT);  digitalWrite(D8, LOW);
 
   resetOnDemand();
 
