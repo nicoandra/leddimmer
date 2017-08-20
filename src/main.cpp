@@ -22,6 +22,8 @@ WiFiManagerParameter custom_mqtt_server("server", "mqtt server", mqtt_server, 40
 WiFiManagerParameter custom_mqtt_port("port", "mqtt port", mqtt_port, 6);
 WiFiManagerParameter custom_device_name("device_name", "device name", device_name, 32);
 
+int lightValues[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
 long lastMsg = 0;
 char msg[2048];
 int value = 0;
@@ -44,12 +46,6 @@ void resetOnDemand(){
 }
 
 bool doReadConfig(){
-  /* if (!SPIFFS.begin()) {
-    Serial.println("failed to mount FS in doReadConfig");
-    return false;
-  }*/
-
-
   if (!SPIFFS.exists("/config.json")) {
     // If Config file does not exist Force the Config page
     Serial.println("doReadConfig: config file does not exist");
@@ -84,7 +80,6 @@ bool doReadConfig(){
   strcpy(mqtt_port, json["mqtt_port"]);
   strcpy(device_name, json["device_name"]);
   Serial.println("Json parsed and configuration loaded from file");
-
 }
 
 void doSaveConfig(){
@@ -128,6 +123,59 @@ void saveConfigCallback () {
 }
 
 
+String macAddress() {
+  String formatted = "";
+  char mac_address[20];
+  WiFi.macAddress().toCharArray(mac_address, 20);
+  for(int i = 0; i < 17; i++){
+    if(i == 2 || i == 5 || i == 8 || i == 11 || i == 14){
+      continue;
+    }
+    formatted = formatted + mac_address[i];
+  }
+  return formatted;
+}
+
+void announce(){
+  String mac_address = macAddress();
+  char message[2048];
+  DynamicJsonBuffer jsonBufferPub;
+
+  JsonObject& json = jsonBufferPub.createObject();
+  JsonArray& lights = json.createNestedArray("lights");
+
+  Serial.println(mac_address);
+  json["mac_address"] = mac_address;
+  json["device_name"] = device_name;
+
+  for(int i = 1; i < 9; i++){
+    lights.add(lightValues[i - 1]);
+  }
+
+  json.printTo(message);
+  Serial.print("Publish message: ");
+  Serial.println(message);
+  client.publish("/device/announcement", message);
+}
+
+
+void updatePinValues(){
+  for(int i = 1; i < 8; i++){
+    int pinNumber = 1;
+    switch(i){
+      case 1: pinNumber = 5; break;
+      case 2: pinNumber = 4; break;
+      case 3: pinNumber = 0; break;
+      case 4: pinNumber = 2; break;
+      case 5: pinNumber = 14; break;
+      case 6: pinNumber = 12; break;
+      case 7: pinNumber = 13; break;
+      case 8: pinNumber = 15; break;
+    }
+    analogWrite(pinNumber, lightValues[i]);
+  }
+}
+
 void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
   JsonObject& jsonPayload = jsonBufferSub.parseObject(payload);
 
@@ -148,72 +196,14 @@ void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
     Serial.print(" : ");
     String stringValue = lightName.as<char*>();
     int value = stringValue.toInt();
-
-    int pinNumber = 1;
-    switch(i){
-      case 1: pinNumber = 5; break;
-      case 2: pinNumber = 4; break;
-      case 3: pinNumber = 0; break;
-      case 4: pinNumber = 2; break;
-      case 5: pinNumber = 14; break;
-      case 6: pinNumber = 12; break;
-      case 7: pinNumber = 13; break;
-      case 8: pinNumber = 15; break;
-    }
-    Serial.print("PinNumber: ");
-    Serial.print(pinNumber);
-    Serial.print(" value: ");
     Serial.println(value);
     // Serial.println(String("Setting pin ") + String(pinNumber) + String(" to analog value ") + String(value));
-    analogWrite(pinNumber, value);
+    lightValues[i] = value;
   }
 
-
+  updatePinValues();
+  announce();
   return ;
-
-  String value = jsonPayload[String("hola")];
-  Serial.println(value);
-  jsonPayload.printTo(Serial);
-
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println("Received "  + String((char)payload[0]));
-
-  switch((char)payload[0]){
-    case '0':
-      digitalWrite(D2, LOW);   // Turn the LED on (Note that LOW is the voltage level
-      return;
-      break;
-    case '1':
-      digitalWrite(D2, LOW);   // Turn the LED on (Note that LOW is the voltage level
-      return;
-      break;
-    case 'X':
-        int power = (int)payload[1] * 1000 + (int)payload[2] * 100 + (int)payload[3] * 10 + (int)payload[4] - (1111 * 48);   // Turn the LED on (Note that LOW is the voltage level
-        analogWrite(D2, power);   // Turn the LED on (Note that LOW is the voltage level
-        char buf[2];
-        sprintf(buf, "%d", power);
-        Serial.println("Setting power to " + String(buf));
-        client.publish("outTopic", buf, 2);
-        return;
-        break;
-  }
-
-
-
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
-  } else {
-    digitalWrite(D2, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
-
 }
 
 void configModeCallback (WiFiManager *myWiFiManager) {
@@ -316,27 +306,6 @@ void reconnect() {
       delay(1500);
     }
   }
-}
-
-void announce(){
-  char mac_address[20];
-  char message[2048];
-  DynamicJsonBuffer jsonBufferPub;
-
-  JsonObject& json = jsonBufferPub.createObject();
-  Serial.println(WiFi.macAddress());
-  WiFi.macAddress().toCharArray(mac_address, 20);
-  json["mac_address"] = mac_address;
-  json["device_name"] = device_name;
-  json.printTo(message);
-  // snprintf (msg, 75, macAddress);
-  Serial.print("Publish message: ");
-  // msg = msg + device_name;
-  Serial.println(message);
-  // sprintf(msg, "{'device_name' : '%s', mac_address: '%s'}", device_name, msg);
-  client.publish("/device/announcement", message);
-
-
 }
 
 void loop() {
