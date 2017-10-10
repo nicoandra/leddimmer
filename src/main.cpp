@@ -147,6 +147,7 @@ void announce(){
   Serial.println(mac_address);
   json["mac_address"] = mac_address;
   json["device_name"] = device_name;
+  json["subscribed_to"] = "/lights/" + WiFi.macAddress();
 
   for(int i = 1; i < 9; i++){
     lights.add(lightValues[i - 1]);
@@ -157,7 +158,6 @@ void announce(){
   Serial.println(message);
   client.publish("/device/announcement", message);
 }
-
 
 void updatePinValues(){
   for(int i = 1; i < 8; i++){
