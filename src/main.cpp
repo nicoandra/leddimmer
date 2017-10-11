@@ -12,6 +12,8 @@ char mqtt_port[6] = "1883";
 char device_name[32] = "ESP Dimmer";
 
 
+const int SUB_BUFFER_SIZE = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(10);
+
 bool shouldSaveConfig = false;  //flag for saving data
 
 WiFiClient espClient;
@@ -23,13 +25,13 @@ WiFiManagerParameter custom_mqtt_port("port", "mqtt port", mqtt_port, 6);
 WiFiManagerParameter custom_device_name("device_name", "device name", device_name, 32);
 
 int lightValues[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int allowAnnounce = 1;
 
 long lastMsg = 0;
 char msg[2048];
 int value = 0;
 
-DynamicJsonBuffer jsonBufferPub;
-DynamicJsonBuffer jsonBufferSub;
+// DynamicJsonBuffer jsonBufferSub;
 
 void resetOnDemand(){
 
@@ -137,6 +139,11 @@ String macAddress() {
 }
 
 void announce(){
+  if( allowAnnounce == 0){
+    return ;
+  }
+  lastMsg = millis();
+
   String mac_address = macAddress();
   char message[2048];
   DynamicJsonBuffer jsonBufferPub;
@@ -147,7 +154,7 @@ void announce(){
   Serial.println(mac_address);
   json["mac_address"] = mac_address;
   json["device_name"] = device_name;
-  json["subscribed_to"] = "/lights/" + WiFi.macAddress();
+  // json["subscribed_to"] = "/lights/" + WiFi.macAddress();
 
   for(int i = 1; i < 9; i++){
     lights.add(lightValues[i - 1]);
@@ -176,10 +183,26 @@ void updatePinValues(){
   }
 }
 
-void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
-  JsonObject& jsonPayload = jsonBufferSub.parseObject(payload);
+void mqttMessageCallback(char* topicParam, byte* payloadParam, unsigned int length) {
+  allowAnnounce = 0;
+  /*char topic[255];
+  strcpy(topic, topicParam);
+  */
+  if( length > 254 ){
+    return ;
+  }
 
+  char payload[255] = "";
+  strncpy(payload, (char *)payloadParam, length);
+
+  Serial.print("Payload: ");
+  Serial.print(payload);
+
+  StaticJsonBuffer<SUB_BUFFER_SIZE> jsonBufferSub;
+  JsonObject& jsonPayload = jsonBufferSub.parseObject(payload);
+  Serial.print(" - Parsed: ");
   jsonPayload.printTo(Serial);
+  Serial.println("***");
 
   for(int i = 1; i < 8; i++){
     char lightCharArray[15];
@@ -187,12 +210,14 @@ void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
 
     JsonVariant lightName = jsonPayload[lightCharArray];
     if(!lightName.success()){
+      /*
       Serial.print("No data for light ");
       Serial.println(i);
+      */
       continue;
     }
 
-    Serial.print(i);
+    Serial.print(lightCharArray);
     Serial.print(" : ");
     String stringValue = lightName.as<char*>();
     int value = stringValue.toInt();
@@ -201,8 +226,9 @@ void mqttMessageCallback(char* topic, byte* payload, unsigned int length) {
     lightValues[i] = value;
   }
 
+  allowAnnounce = 1;
   updatePinValues();
-  announce();
+  // announce();
   return ;
 }
 
@@ -303,7 +329,7 @@ void reconnect() {
       Serial.print(client.state());
       Serial.println(" try #" + String(tryes) + " again in 5 seconds");
       // Wait 5 seconds before retrying
-      delay(1500);
+      delay(1600);
     }
   }
 }
@@ -317,13 +343,8 @@ void loop() {
   client.loop();
 
   long now = millis();
-  if (now - lastMsg > 2000) {
+  if (now - lastMsg > 10000 || now < lastMsg) {
     lastMsg = now;
-    // ++value;
-    /* snprintf (msg, 75, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("outTopic", msg);*/
     announce();
   }
 }
